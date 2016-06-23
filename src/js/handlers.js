@@ -117,7 +117,9 @@
           return;
         }
 
-        event.preventDefault();
+        if (action !== ACTION_NONE) {
+          event.preventDefault();
+        }
 
         this.action = action;
         this.cropping = false;
@@ -170,7 +172,11 @@
           return;
         }
 
-        event.preventDefault();
+        if (action !== ACTION_NONE) {
+          event.preventDefault();
+        } else {
+          return;
+        }
 
         this.endX = e.pageX || originalEvent && originalEvent.pageX;
         this.endY = e.pageY || originalEvent && originalEvent.pageY;
