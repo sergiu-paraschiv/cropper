@@ -858,6 +858,8 @@ Get a canvas drawn the cropped image. If it is not cropped, then returns the who
 If tiling is switched on, the cropper will attempt to tile the image on the given canvas size, but may flip the aspect ratio
 in order to fit more on.
 
+TODO: Modify to decide canvas flipping and don't flip by default.
+
 > After then, you can display the canvas as an image directly, or use [HTMLCanvasElement.toDataURL](https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toDataURL) to get a Data URL, or use [HTMLCanvasElement.toBlob](https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob) to get a blob and upload it to server with [FormData](https://developer.mozilla.org/en-US/docs/Web/API/FormData) if the browser supports these APIs.
 
 ```js
