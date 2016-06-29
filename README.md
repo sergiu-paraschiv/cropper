@@ -5,7 +5,7 @@
 - [Website](https://fengyuanchen.github.io/cropper)
 - [Cropper without jQuery](https://github.com/fengyuanchen/cropperjs)
 
-[![Build Status Images](https://travis-ci.org/fengyuanchen/cropper.svg)](https://travis-ci.org/fengyuanchen/cropper)
+[![Build Status Images](https://travis-ci.org/oddprints/cropper.svg)](https://travis-ci.org/oddprints/cropper)
 
 
 
