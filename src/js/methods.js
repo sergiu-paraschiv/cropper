@@ -614,55 +614,71 @@
      * @return {HTMLCanvasElement} canvas
      */
     getCroppedCanvas: function (options) {
-      var originalWidth;
-      var originalHeight;
       var canvasWidth;
       var canvasHeight;
-      var scaledWidth;
-      var scaledHeight;
-      var scaledRatio;
-      var aspectRatio;
+      var imageWidth;
+      var imageHeight;
+      var outerWidth;
+      var outerHeight;
       var canvas;
+      var image;
       var context;
-      var data;
+      var margin = MARGIN;
+      var border = BORDER;
+	    var tiled = false;
+      var data = this.getData();
 
       if (!this.isBuilt || !SUPPORT_CANVAS) {
         return;
       }
 
+	    image = getSourceCanvas(this.$clone[0], this.image, data);
+
       if (!this.isCropped) {
-        return getSourceCanvas(this.$clone[0], this.image);
+        return image;
       }
+
+	    imageWidth = outerWidth = image.width;
+	    imageHeight = outerHeight = image.height;
 
       if (!$.isPlainObject(options)) {
         options = {};
       }
 
-      data = this.getData();
-      originalWidth = data.width;
-      originalHeight = data.height;
-      aspectRatio = originalWidth / originalHeight;
-
       if ($.isPlainObject(options)) {
-        scaledWidth = options.width;
-        scaledHeight = options.height;
-
-        if (scaledWidth) {
-          scaledHeight = scaledWidth / aspectRatio;
-          scaledRatio = scaledWidth / originalWidth;
-        } else if (scaledHeight) {
-          scaledWidth = scaledHeight * aspectRatio;
-          scaledRatio = scaledHeight / originalHeight;
-        }
+        imageWidth = options.imageWidth || imageWidth;
+        imageHeight = options.imageHeight || imageHeight;
+        outerWidth = options.width || outerWidth;
+        outerHeight = options.height || outerHeight;
+		    tiled = options.tiled;
+		    margin = options.margin || MARGIN;
+		    border = options.border || BORDER;
       }
 
       // The canvas element will use `Math.floor` on a float number, so floor first
-      canvasWidth = floor(scaledWidth || originalWidth);
-      canvasHeight = floor(scaledHeight || originalHeight);
+      canvasWidth = floor(outerWidth);
+      canvasHeight = floor(outerHeight);
 
       canvas = $('<canvas>')[0];
+	    if (tiled === true) {
+        var tiles = calculateMostTiles({
+        	width: canvasWidth,
+        	height: canvasHeight
+        }, {
+        	width: imageWidth,
+        	height: imageHeight
+        }, border, margin);
+
+        if (tiles.canvasRotated === true) {
+          var tmp = canvasWidth;
+          canvasWidth = canvasHeight;
+          canvasHeight = tmp;
+        }
+      }
+
       canvas.width = canvasWidth;
       canvas.height = canvasHeight;
+
       context = canvas.getContext('2d');
 
       if (options.fillColor) {
@@ -671,65 +687,27 @@
       }
 
       // https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D.drawImage
-      context.drawImage.apply(context, (function () {
-        var source = getSourceCanvas(this.$clone[0], this.image);
-        var sourceWidth = source.width;
-        var sourceHeight = source.height;
-        var canvas = this.canvas;
-        var params = [source];
+      if (tiled === true) {
+        var marginPixels = margin * DPI;
+        var horizontalBorderPixels = (canvasWidth - (tiles.horizontal * imageWidth) - ((tiles.horizontal - 1) * marginPixels)) / 2;
+        var verticalBorderPixels = (canvasHeight - (tiles.vertical * imageHeight) - ((tiles.vertical - 1) * marginPixels)) / 2;
 
-        // Source canvas
-        var srcX = data.x + canvas.naturalWidth * (abs(data.scaleX || 1) - 1) / 2;
-        var srcY = data.y + canvas.naturalHeight * (abs(data.scaleY || 1) - 1) / 2;
-        var srcWidth;
-        var srcHeight;
-
-        // Destination canvas
-        var dstX;
-        var dstY;
-        var dstWidth;
-        var dstHeight;
-
-        if (srcX <= -originalWidth || srcX > sourceWidth) {
-          srcX = srcWidth = dstX = dstWidth = 0;
-        } else if (srcX <= 0) {
-          dstX = -srcX;
-          srcX = 0;
-          srcWidth = dstWidth = min(sourceWidth, originalWidth + srcX);
-        } else if (srcX <= sourceWidth) {
-          dstX = 0;
-          srcWidth = dstWidth = min(originalWidth, sourceWidth - srcX);
+        //Then draw on tiled images:
+        for (var x = 0; x < tiles.horizontal; x++) {
+          for (var y = 0; y < tiles.vertical; y++) {
+            var posX = horizontalBorderPixels + (marginPixels * x) + (imageWidth * x);
+            var posY = verticalBorderPixels + (marginPixels * y) + (imageHeight * y);
+            context.drawImage(image, posX, posY, imageWidth, imageHeight);
+          }
         }
+      } else {
+        var dstX = (canvasWidth - imageWidth) / 2;
+      	var dstY = (canvasHeight - imageHeight) / 2;
+        var dstWidth = imageWidth;
+        var dstHeight = imageHeight;
 
-        if (srcWidth <= 0 || srcY <= -originalHeight || srcY > sourceHeight) {
-          srcY = srcHeight = dstY = dstHeight = 0;
-        } else if (srcY <= 0) {
-          dstY = -srcY;
-          srcY = 0;
-          srcHeight = dstHeight = min(sourceHeight, originalHeight + srcY);
-        } else if (srcY <= sourceHeight) {
-          dstY = 0;
-          srcHeight = dstHeight = min(originalHeight, sourceHeight - srcY);
-        }
-
-        // All the numerical parameters should be integer for `drawImage` (#476)
-        params.push(floor(srcX), floor(srcY), floor(srcWidth), floor(srcHeight));
-
-        // Scale destination sizes
-        if (scaledRatio) {
-          dstX *= scaledRatio;
-          dstY *= scaledRatio;
-          dstWidth *= scaledRatio;
-          dstHeight *= scaledRatio;
-        }
-
-        // Avoid "IndexSizeError" in IE and Firefox
-        if (dstWidth > 0 && dstHeight > 0) {
-          params.push(floor(dstX), floor(dstY), floor(dstWidth), floor(dstHeight));
-        }
-
-        return params;
-      }).call(this));
+        context.drawImage(image, dstX, dstY, dstWidth, dstHeight);
+      }
 
       return canvas;
     },

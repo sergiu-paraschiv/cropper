@@ -107,7 +107,7 @@
     };
   }
 
-  function getSourceCanvas(image, data) {
+  function getSourceCanvas(image, data, cropBox) {
     var canvas = $('<canvas>')[0];
     var context = canvas.getContext('2d');
     var dstX = 0;
@@ -122,11 +122,12 @@
     var advanced = rotatable || scalable;
     var canvasWidth = dstWidth * abs(scaleX || 1);
     var canvasHeight = dstHeight * abs(scaleY || 1);
-    var translateX;
-    var translateY;
+    var translateX = 0;
+    var translateY = 0;
     var rotated;
+    var maxCanvasEdge = 2796;
 
-    if (scalable) {
+  	if (scalable) {
       translateX = canvasWidth / 2;
       translateY = canvasHeight / 2;
     }
@@ -140,12 +141,36 @@
 
       canvasWidth = rotated.width;
       canvasHeight = rotated.height;
-      translateX = canvasWidth / 2;
+
+  	  translateX = canvasWidth / 2;
       translateY = canvasHeight / 2;
     }
 
+    // Only cut out the cropbox, or scale it down to ensure highest quality cropping:
+    var scaledRatio = 1;
+	  if (max(cropBox.width, cropBox.height) > maxCanvasEdge) {
+	    // We need to scale it to resolve memory issues on low-memory devices:
+	    var scaledRatio = max(cropBox.width, cropBox.height) / maxCanvasEdge;
+	    var isPortrait = (cropBox.height > cropBox.width);
+
+      canvasWidth = cropBox.width /= scaledRatio;
+  	  canvasHeight = cropBox.height /= scaledRatio;
+	    translateX /= scaledRatio;
+	    translateY /= scaledRatio;
+	    dstWidth /= scaledRatio;
+	    dstHeight /= scaledRatio;
+	    dstX /= scaledRatio;
+	    dstY /= scaledRatio;
+	  } else {
+      canvasWidth = cropBox.width;
+	    canvasHeight = cropBox.height;
+	  }
+
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
+
+    translateX -= (cropBox.x /= scaledRatio);
+    translateY -= (cropBox.y /= scaledRatio);
 
     if (advanced) {
       dstX = -dstWidth / 2;
@@ -153,6 +178,9 @@
 
       context.save();
       context.translate(translateX, translateY);
+    } else {
+      dstX -= cropBox.x;
+      dstY -= cropBox.y;
     }
 
     // Scale should come first before rotate (#633, #709)
@@ -381,4 +409,55 @@
       dimensions = { width: side, height: side / cropBoxAspectRatio };
     }
     return dimensions;
+  }
+
+  function calculateNumberOfTiles(canvasSize, cropSize, border, margin) {
+    var availableWidth = canvasSize.width - (2 * border);
+    var availableHeight = canvasSize.height - (2 * border);
+
+    var takenWidth = 0;
+    var first = true;
+    var horizontalTiles = 0;
+    while (takenWidth < availableWidth) {
+      takenWidth += (first ? cropSize.width : cropSize.width + margin);
+      if (takenWidth > availableWidth) {
+        break;
+      }
+      first = false;
+      horizontalTiles++;
+    }
+
+    var takenHeight = 0;
+    first = true;
+    var verticalTiles = 0;
+    while (takenHeight < availableHeight) {
+      takenHeight += (first ? cropSize.height : cropSize.height + margin);
+      if (takenHeight > availableHeight) {
+        break;
+      }
+      first = false;
+      verticalTiles++;
+    }
+
+    return {
+      horizontal: horizontalTiles,
+      vertical: verticalTiles,
+      total: horizontalTiles * verticalTiles
+    }
+  }
+
+  function calculateMostTiles(canvasSize, cropSize, border, margin) {
+    var numberOfTilesInSelectedOrientation = calculateNumberOfTiles(canvasSize, cropSize, border, margin);
+    var tiles = numberOfTilesInSelectedOrientation;
+    var rotated = {
+      width: canvasSize.height,
+      height: canvasSize.width
+    };
+    var numberOfTilesInOtherOrientation = calculateNumberOfTiles(rotated, cropSize, border, margin);
+
+    if (numberOfTilesInOtherOrientation.total > numberOfTilesInSelectedOrientation.total) {
+      tiles = numberOfTilesInOtherOrientation;
+      tiles.canvasRotated = true;
+    }
+    return tiles;
   }
