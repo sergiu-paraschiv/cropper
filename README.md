@@ -839,6 +839,9 @@ Change the crop box position and size with new data.
   - Properties:
     - `width`: the destination width of the output canvas
     - `height`: the destination height of the output canvas
+    - `imageWidth`: The destination width of the cropped image
+    - `imageHeight`: The destination height of the cropped image
+    - `tiled`: (Boolean) whether or not to tile the image (canvas may rotate to fit more on)
     - `fillColor`: a color to fill any alpha values in the output canvas
 
 - (return  value):
