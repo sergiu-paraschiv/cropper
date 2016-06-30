@@ -625,21 +625,21 @@
       var context;
       var margin = MARGIN * DPI;
       var border = BORDER * DPI;
-	    var tiled = false;
+      var tiled = false;
       var data = this.getData();
 
       if (!this.isBuilt || !SUPPORT_CANVAS) {
         return;
       }
 
-	    image = getSourceCanvas(this.$clone[0], this.image, data);
+      image = getSourceCanvas(this.$clone[0], this.image, data);
 
       if (!this.isCropped) {
         return image;
       }
 
-	    imageWidth = outerWidth = image.width;
-	    imageHeight = outerHeight = image.height;
+      imageWidth = outerWidth = image.width;
+      imageHeight = outerHeight = image.height;
 
       if (!$.isPlainObject(options)) {
         options = {};
@@ -650,9 +650,9 @@
         imageHeight = options.imageHeight || imageHeight;
         outerWidth = options.width || outerWidth;
         outerHeight = options.height || outerHeight;
-		    tiled = options.tiled;
-		    margin = options.margin || MARGIN * DPI;
-		    border = options.border || BORDER * DPI;
+        tiled = options.tiled;
+        margin = options.margin || MARGIN * DPI;
+        border = options.border || BORDER * DPI;
       }
 
       // The canvas element will use `Math.floor` on a float number, so floor first
@@ -660,13 +660,13 @@
       canvasHeight = floor(outerHeight);
 
       canvas = $('<canvas>')[0];
-	    if (tiled === true) {
+      if (tiled === true) {
         var tiles = calculateMostTiles({
-        	width: canvasWidth,
-        	height: canvasHeight
+          width: canvasWidth,
+          height: canvasHeight
         }, {
-        	width: imageWidth,
-        	height: imageHeight
+          width: imageWidth,
+          height: imageHeight
         }, border, margin);
 
         if (tiles.canvasRotated === true) {

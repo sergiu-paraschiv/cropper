@@ -127,7 +127,7 @@
     var rotated;
     var maxCanvasEdge = 2796;
 
-  	if (scalable) {
+    if (scalable) {
       translateX = canvasWidth / 2;
       translateY = canvasHeight / 2;
     }
@@ -142,29 +142,28 @@
       canvasWidth = rotated.width;
       canvasHeight = rotated.height;
 
-  	  translateX = canvasWidth / 2;
+      translateX = canvasWidth / 2;
       translateY = canvasHeight / 2;
     }
 
     // Only cut out the cropbox, or scale it down to ensure highest quality cropping:
     var scaledRatio = 1;
-	  if (max(cropBox.width, cropBox.height) > maxCanvasEdge) {
-	    // We need to scale it to resolve memory issues on low-memory devices:
-	    var scaledRatio = max(cropBox.width, cropBox.height) / maxCanvasEdge;
-	    var isPortrait = (cropBox.height > cropBox.width);
+    if (max(cropBox.width, cropBox.height) > maxCanvasEdge) {
+      // We need to scale it to resolve memory issues on low-memory devices:
+      scaledRatio = max(cropBox.width, cropBox.height) / maxCanvasEdge;
 
       canvasWidth = cropBox.width /= scaledRatio;
-  	  canvasHeight = cropBox.height /= scaledRatio;
-	    translateX /= scaledRatio;
-	    translateY /= scaledRatio;
-	    dstWidth /= scaledRatio;
-	    dstHeight /= scaledRatio;
-	    dstX /= scaledRatio;
-	    dstY /= scaledRatio;
-	  } else {
+      canvasHeight = cropBox.height /= scaledRatio;
+      translateX /= scaledRatio;
+      translateY /= scaledRatio;
+      dstWidth /= scaledRatio;
+      dstHeight /= scaledRatio;
+      dstX /= scaledRatio;
+      dstY /= scaledRatio;
+    } else {
       canvasWidth = cropBox.width;
-	    canvasHeight = cropBox.height;
-	  }
+      canvasHeight = cropBox.height;
+    }
 
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
