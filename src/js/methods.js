@@ -623,8 +623,8 @@
       var canvas;
       var image;
       var context;
-      var margin = MARGIN;
-      var border = BORDER;
+      var margin = MARGIN * DPI;
+      var border = BORDER * DPI;
 	    var tiled = false;
       var data = this.getData();
 
@@ -651,8 +651,8 @@
         outerWidth = options.width || outerWidth;
         outerHeight = options.height || outerHeight;
 		    tiled = options.tiled;
-		    margin = options.margin || MARGIN;
-		    border = options.border || BORDER;
+		    margin = options.margin || MARGIN * DPI;
+		    border = options.border || BORDER * DPI;
       }
 
       // The canvas element will use `Math.floor` on a float number, so floor first
@@ -688,7 +688,7 @@
 
       // https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D.drawImage
       if (tiled === true) {
-        var marginPixels = margin * DPI;
+        var marginPixels = margin;
         var horizontalBorderPixels = (canvasWidth - (tiles.horizontal * imageWidth) - ((tiles.horizontal - 1) * marginPixels)) / 2;
         var verticalBorderPixels = (canvasHeight - (tiles.vertical * imageHeight) - ((tiles.vertical - 1) * marginPixels)) / 2;
 
