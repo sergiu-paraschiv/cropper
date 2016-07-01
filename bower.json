@@ -1,5 +1,5 @@
 {
-  "name": "cropper",
+  "name": "oddprints-cropper",
   "description": "A simple jQuery image cropping plugin.",
   "main": [
     "dist/cropper.js",
@@ -23,9 +23,9 @@
     "web",
     "development"
   ],
-  "homepage": "https://github.com/fengyuanchen/cropper",
+  "homepage": "https://github.com/oddprints/cropper",
   "authors": [
-    "Fengyuan Chen"
+    "Fengyuan Chen and OddPrints"
   ],
   "license": "MIT",
   "ignore": [

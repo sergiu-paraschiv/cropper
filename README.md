@@ -2,8 +2,7 @@
 
 > A simple jQuery image cropping plugin.
 
-- [Website](https://fengyuanchen.github.io/cropper)
-- [Cropper without jQuery](https://github.com/fengyuanchen/cropperjs)
+- [Website](https://oddprints.github.io/cropper)
 
 [![Build Status Images](https://travis-ci.org/OddPrints/cropper.svg)](https://travis-ci.org/OddPrints/cropper)
 
@@ -58,13 +57,10 @@ dist/
 
 ### Quick start
 
-Four quick start options are available:
+Two quick start options are available:
 
-- [Download the latest release](https://github.com/fengyuanchen/cropper/archive/master.zip).
-- Clone the repository: `git clone https://github.com/fengyuanchen/cropper.git`.
-- Install with [NPM](http://npmjs.org): `npm install cropper`.
-- Install with [Bower](http://bower.io): `bower install cropper`.
-
+- [Download the latest release](https://github.com/oddprints/cropper/archive/master.zip).
+- Clone the repository: `git clone https://github.com/oddprints/cropper.git`.
 
 
 ### Installation
