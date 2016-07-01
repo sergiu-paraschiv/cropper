@@ -441,7 +441,7 @@
       horizontal: horizontalTiles,
       vertical: verticalTiles,
       total: horizontalTiles * verticalTiles
-    }
+    };
   }
 
   function calculateMostTiles(canvasSize, cropSize, border, margin) {
