@@ -1,11 +1,11 @@
 /*!
  * Cropper v2.3.3
- * https://github.com/fengyuanchen/cropper
+ * https://github.com/OddPrints/cropper forked from https://github.com/fengyuanchen/cropper
  *
- * Copyright (c) 2014-2016 Fengyuan Chen and contributors
+ * Copyright (c) 2015-2016 OddPrints and contributors originally 2014-2016 Fengyuan Chen and contributors
  * Released under the MIT license
  *
- * Date: 2016-07-01T11:22:58.099Z
+ * Date: 2016-07-01T11:35:42.277Z
  */
 
 (function (factory) {
@@ -68,9 +68,9 @@
 
   // RegExps
   var REGEXP_ACTIONS = /^e|w|s|n|se|sw|ne|nw|all|crop|move|zoom$/;
-  var REGEXP_DATA_URL = /^data\:/;
-  var REGEXP_DATA_URL_HEAD = /^data\:([^\;]+)\;base64,/;
-  var REGEXP_DATA_URL_JPEG = /^data\:image\/jpeg.*;base64,/;
+  var REGEXP_DATA_URL = /^data:/;
+  var REGEXP_DATA_URL_HEAD = /^data:([^;]+);base64,/;
+  var REGEXP_DATA_URL_JPEG = /^data:image\/jpeg.*;base64,/;
 
   // Data keys
   var DATA_PREVIEW = 'preview';
@@ -2872,8 +2872,8 @@
       var canvas;
       var image;
       var context;
-      var margin = MARGIN;
-      var border = BORDER;
+      var margin = MARGIN * DPI;
+      var border = BORDER * DPI;
       var tiled = false;
       var data = this.getData();
 
