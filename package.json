@@ -1,13 +1,13 @@
 {
   "name": "cropper",
-  "description": "A simple jQuery image cropping plugin.",
-  "version": "2.3.2",
+  "description": "Another simple jQuery image cropping plugin.",
+  "version": "2.3.3",
   "main": "dist/cropper.js",
   "license": "MIT",
-  "repository": "fengyuanchen/cropper",
-  "homepage": "https://fengyuanchen.github.io/cropper",
+  "repository": "OddPrints/cropper",
+  "homepage": "https://oddprints.github.io/cropper",
   "author": {
-    "name": "Fengyuan Chen",
+    "name": "Fengyuan Chen and OddPrints",
     "url": "http://chenfengyuan.com"
   },
   "keywords": [
@@ -15,6 +15,7 @@
     "crop",
     "cropper",
     "cropping",
+    "tiling",
     "move",
     "zoom",
     "rotate",

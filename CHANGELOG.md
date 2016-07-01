@@ -1,6 +1,12 @@
 # Changelog
 
 
+## 2.3.3 (Jul 1, 2016)
+
+- Added support for low memory devices to avoid image resizing before cropping (fengyuanchen/cropper#577)
+- Fixed touch-scroll on container when dragMode: none not being honoured (fengyuanchen/cropper#727).
+- Added the extra imageWidth/Height and tiled options to getCroppedCanvas.
+
 ## 2.3.2 (Jun 8, 2016)
 
 - Fixed wrong property reference (#705)
