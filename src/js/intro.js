@@ -1,8 +1,8 @@
 /*!
  * Cropper v@VERSION
- * https://github.com/fengyuanchen/cropper
+ * https://github.com/OddPrints/cropper forked from https://github.com/fengyuanchen/cropper
  *
- * Copyright (c) 2014-@YEAR Fengyuan Chen and contributors
+ * Copyright (c) 2015-@YEAR OddPrints and contributors originally 2014-@YEAR Fengyuan Chen and contributors
  * Released under the MIT license
  *
  * Date: @DATE

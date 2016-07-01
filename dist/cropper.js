@@ -1,11 +1,11 @@
 /*!
  * Cropper v2.3.3
- * https://github.com/fengyuanchen/cropper
+ * https://github.com/OddPrints/cropper forked from https://github.com/fengyuanchen/cropper
  *
- * Copyright (c) 2014-2016 Fengyuan Chen and contributors
+ * Copyright (c) 2015-2016 OddPrints and contributors originally 2014-2016 Fengyuan Chen and contributors
  * Released under the MIT license
  *
- * Date: 2016-07-01T11:22:58.099Z
+ * Date: 2016-07-01T11:35:42.277Z
  */
 
 (function (factory) {
@@ -1166,7 +1166,7 @@
         }
       }
 
-      if (options.rotateMode === 1) {
+      if (options.viewMode === 4) {
         if (canvas.aspectRatio > (container.width / container.height)) {
           if (parseInt(canvas.width) != parseInt(container.width)) {
             canvas.width = container.width;
