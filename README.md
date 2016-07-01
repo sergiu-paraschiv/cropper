@@ -13,7 +13,7 @@ Credit is due to the author and contributor of the original [Cropper](https://fe
 was first written by [Fengyuan Chen](http://chenfengyuan.com/). All of this work is built upon his fantastic work, and that
 of those who contribute to his original repo.
 
-## Why a Fork?
+## Why the Fork?
 
 This project was forked from the original [Cropper](https://fengyuanchen.github.io/cropper) so as to add the new [viewMode](#viewmode)
 functionality, and to enable significant changes to the [getCroppedCanvas](#getcroppedcanvasoptions) method to better handle low
