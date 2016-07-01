@@ -284,6 +284,10 @@ a:hover {
 	color: #6DB09D;
 }
 
+.jumbotron a, .jumbotron a:hover {
+	color: #FFFFFF;
+}
+
 .btn-primary {
 	background-color: #6DB09D;
 	border-color: #508576;
