@@ -1,11 +1,11 @@
 /*!
- * Cropper v2.3.2
+ * Cropper v2.3.3
  * https://github.com/fengyuanchen/cropper
  *
  * Copyright (c) 2014-2016 Fengyuan Chen and contributors
  * Released under the MIT license
  *
- * Date: 2016-06-08T12:14:46.286Z
+ * Date: 2016-07-01T11:22:58.099Z
  */
 
 (function (factory) {
@@ -35,6 +35,9 @@
 
   // Constants
   var NAMESPACE = 'cropper';
+  var DPI = 233;
+  var BORDER = 0.15748031480000002;
+  var MARGIN = 0.039370078700000005;
 
   // Classes
   var CLASS_MODAL = 'cropper-modal';
@@ -64,7 +67,7 @@
   var EVENT_ZOOM = 'zoom.' + NAMESPACE;
 
   // RegExps
-  var REGEXP_ACTIONS = /e|w|s|n|se|sw|ne|nw|all|crop|move|zoom/;
+  var REGEXP_ACTIONS = /^e|w|s|n|se|sw|ne|nw|all|crop|move|zoom$/;
   var REGEXP_DATA_URL = /^data\:/;
   var REGEXP_DATA_URL_HEAD = /^data\:([^\;]+)\;base64,/;
   var REGEXP_DATA_URL_JPEG = /^data\:image\/jpeg.*;base64,/;
@@ -102,6 +105,7 @@
   var sqrt = Math.sqrt;
   var round = Math.round;
   var floor = Math.floor;
+  var pow = Math.pow;
 
   // Utilities
   var fromCharCode = String.fromCharCode;
@@ -215,7 +219,7 @@
     };
   }
 
-  function getSourceCanvas(image, data) {
+  function getSourceCanvas(image, data, cropBox) {
     var canvas = $('<canvas>')[0];
     var context = canvas.getContext('2d');
     var dstX = 0;
@@ -230,9 +234,10 @@
     var advanced = rotatable || scalable;
     var canvasWidth = dstWidth * abs(scaleX || 1);
     var canvasHeight = dstHeight * abs(scaleY || 1);
-    var translateX;
-    var translateY;
+    var translateX = 0;
+    var translateY = 0;
     var rotated;
+    var maxCanvasEdge = 2796;
 
     if (scalable) {
       translateX = canvasWidth / 2;
@@ -248,12 +253,35 @@
 
       canvasWidth = rotated.width;
       canvasHeight = rotated.height;
+
       translateX = canvasWidth / 2;
       translateY = canvasHeight / 2;
     }
 
+    // Only cut out the cropbox, or scale it down to ensure highest quality cropping:
+    var scaledRatio = 1;
+    if (max(cropBox.width, cropBox.height) > maxCanvasEdge) {
+      // We need to scale it to resolve memory issues on low-memory devices:
+      scaledRatio = max(cropBox.width, cropBox.height) / maxCanvasEdge;
+
+      canvasWidth = cropBox.width /= scaledRatio;
+      canvasHeight = cropBox.height /= scaledRatio;
+      translateX /= scaledRatio;
+      translateY /= scaledRatio;
+      dstWidth /= scaledRatio;
+      dstHeight /= scaledRatio;
+      dstX /= scaledRatio;
+      dstY /= scaledRatio;
+    } else {
+      canvasWidth = cropBox.width;
+      canvasHeight = cropBox.height;
+    }
+
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
+
+    translateX -= (cropBox.x /= scaledRatio);
+    translateY -= (cropBox.y /= scaledRatio);
 
     if (advanced) {
       dstX = -dstWidth / 2;
@@ -261,6 +289,9 @@
 
       context.save();
       context.translate(translateX, translateY);
+    } else {
+      dstX -= cropBox.x;
+      dstY -= cropBox.y;
     }
 
     // Scale should come first before rotate (#633, #709)
@@ -415,6 +446,130 @@
     }
 
     return 'data:image/jpeg;base64,' + btoa(base64);
+  }
+
+  function vector(p1, p2) {
+    return {
+      x: (p2.x - p1.x),
+      y: (p2.y - p1.y)
+    };
+  }
+
+  function dot(u, v) {
+    return u.x * v.x + u.y * v.y;
+  }
+
+  function pointInRectangle(m, r) {
+    var AB = vector(r.A, r.B);
+    var AM = vector(r.A, m);
+    var BC = vector(r.B, r.C);
+    var BM = vector(r.B, m);
+    var dotABAM = dot(AB, AM);
+    var dotABAB = dot(AB, AB);
+    var dotBCBM = dot(BC, BM);
+    var dotBCBC = dot(BC, BC);
+    return 0 <= dotABAM && dotABAM <= dotABAB && 0 <= dotBCBM && dotBCBM <= dotBCBC;
+  }
+
+  function rotatePoint(pivot, point, angle) {
+    // Rotate clockwise, angle in radians
+    var x = round((cos(angle) * (point.x - pivot.x)) -
+                       (sin(angle) * (point.y - pivot.y)) +
+                       pivot.x),
+        y = round((sin(angle) * (point.x - pivot.x)) +
+                       (cos(angle) * (point.y - pivot.y)) +
+                       pivot.y);
+    return { x: x, y: y };
+  }
+
+  function cropBoxInImage(cropBox, canvas, image) {
+    var cropBoxPoints = {
+      A: { x: round(cropBox.left), y: round(cropBox.top) },
+      B: { x: round(cropBox.left + cropBox.width), y: round(cropBox.top) },
+      C: { x: round(cropBox.left + cropBox.width), y: round(cropBox.top + cropBox.height) },
+      D: { x: round(cropBox.left), y: round(cropBox.top + cropBox.height) }
+    };
+
+    var centers = {
+      x: canvas.left + image.left + (image.width / 2),
+      y: canvas.top + image.top + (image.height / 2)
+    };
+    var angle = (image.rotate ? image.rotate : 0) * Math.PI / 180;
+    var imagePoints = {
+      A: rotatePoint(centers, { x: canvas.left + image.left, y: canvas.top + image.top }, angle),
+      B: rotatePoint(centers, { x: canvas.left + image.left + image.width, y: canvas.top + image.top }, angle),
+      C: rotatePoint(centers, { x: canvas.left + image.left + image.width, y: canvas.top + image.top + image.height }, angle),
+      D: rotatePoint(centers, { x: canvas.left + image.left, y: canvas.top + image.top + image.height }, angle)
+    };
+
+    return pointInRectangle(cropBoxPoints.A, imagePoints) &&
+        pointInRectangle(cropBoxPoints.B, imagePoints) &&
+        pointInRectangle(cropBoxPoints.C, imagePoints) &&
+        pointInRectangle(cropBoxPoints.D, imagePoints);
+  }
+
+  function largestContainedCropBox(image, cropBoxAspectRatio) {
+    var imageShortestSide = min(image.width, image.height);
+    var side = sqrt(pow(imageShortestSide, 2) / 2);
+    var dimensions = {};
+    if (cropBoxAspectRatio < 1) {
+      // Portrait:
+      dimensions = { height: side, width: side * cropBoxAspectRatio };
+    } else {
+      dimensions = { width: side, height: side / cropBoxAspectRatio };
+    }
+    return dimensions;
+  }
+
+  function calculateNumberOfTiles(canvasSize, cropSize, border, margin) {
+    var availableWidth = canvasSize.width - (2 * border);
+    var availableHeight = canvasSize.height - (2 * border);
+
+    var takenWidth = 0;
+    var first = true;
+    var horizontalTiles = 0;
+    while (takenWidth < availableWidth) {
+      takenWidth += (first ? cropSize.width : cropSize.width + margin);
+      if (takenWidth > availableWidth) {
+        break;
+      }
+      first = false;
+      horizontalTiles++;
+    }
+
+    var takenHeight = 0;
+    first = true;
+    var verticalTiles = 0;
+    while (takenHeight < availableHeight) {
+      takenHeight += (first ? cropSize.height : cropSize.height + margin);
+      if (takenHeight > availableHeight) {
+        break;
+      }
+      first = false;
+      verticalTiles++;
+    }
+
+    return {
+      horizontal: horizontalTiles,
+      vertical: verticalTiles,
+      total: horizontalTiles * verticalTiles
+    };
+  }
+
+  function calculateMostTiles(canvasSize, cropSize, border, margin) {
+    var numberOfTilesInSelectedOrientation = calculateNumberOfTiles(canvasSize, cropSize, border, margin);
+    var tiles = numberOfTilesInSelectedOrientation;
+    var rotated = {
+      width: canvasSize.height,
+      height: canvasSize.width
+    };
+    var numberOfTilesInOtherOrientation = calculateNumberOfTiles(rotated, cropSize, border, margin);
+
+    if (numberOfTilesInOtherOrientation.total > numberOfTilesInSelectedOrientation.total) {
+      tiles = numberOfTilesInOtherOrientation;
+      tiles.canvasRotated = true;
+    }
+    return tiles;
   }
 
   function Cropper(element, options) {
@@ -692,7 +847,7 @@
       this.bind();
 
       options.aspectRatio = max(0, options.aspectRatio) || NaN;
-      options.viewMode = max(0, min(3, round(options.viewMode))) || 0;
+      options.viewMode = max(0, min(4, round(options.viewMode))) || 0;
 
       if (options.autoCrop) {
         this.isCropped = true;
@@ -847,7 +1002,7 @@
       canvas.oldTop = canvas.top = (containerHeight - canvasHeight) / 2;
 
       this.canvas = canvas;
-      this.isLimited = (viewMode === 1 || viewMode === 2);
+      this.isLimited = (viewMode === 1 || viewMode === 2 || viewMode === 4);
       this.limitCanvas(true, true);
       this.initialImage = $.extend({}, image);
       this.initialCanvas = $.extend({}, canvas);
@@ -921,7 +1076,7 @@
       }
 
       if (isPositionLimited) {
-        if (viewMode) {
+        if (viewMode && viewMode !== 4) {
           newCanvasLeft = containerWidth - canvas.width;
           newCanvasTop = containerHeight - canvas.height;
 
@@ -964,8 +1119,10 @@
     },
 
     renderCanvas: function (isChanged) {
+      var options = this.options;
       var canvas = this.canvas;
       var image = this.image;
+      var container = this.container;
       var rotate = image.rotate;
       var naturalWidth = image.naturalWidth;
       var naturalHeight = image.naturalHeight;
@@ -1006,6 +1163,22 @@
           }
 
           this.limitCanvas(true, false);
+        }
+      }
+
+      if (options.viewMode === 4) {
+        if (canvas.aspectRatio > (container.width / container.height)) {
+          if (parseInt(canvas.width) != parseInt(container.width)) {
+            canvas.width = container.width;
+            canvas.height = canvas.width / canvas.aspectRatio;
+            canvas.left = 0;
+            canvas.top = (container.height - canvas.height) / 2;
+          }
+        } else if (parseInt(canvas.height) != parseInt(container.height)) {
+          canvas.height = container.height;
+          canvas.width = canvas.height * canvas.aspectRatio;
+          canvas.top = 0;
+          canvas.left = (container.width - canvas.width) / 2;
         }
       }
 
@@ -1123,6 +1296,7 @@
       var containerWidth = container.width;
       var containerHeight = container.height;
       var canvas = this.canvas;
+      var image = this.image;
       var cropBox = this.cropBox;
       var isLimited = this.isLimited;
       var minCropBoxWidth;
@@ -1179,6 +1353,21 @@
           cropBox.maxLeft = containerWidth - cropBox.width;
           cropBox.maxTop = containerHeight - cropBox.height;
         }
+      }
+
+      if (isSizeLimited && isPositionLimited && options.viewMode === 4 && image.left && image.height && !cropBoxInImage(cropBox, canvas, image)) {
+        var largestContainedSize = largestContainedCropBox(image, options.aspectRatio || canvas.aspectRatio);
+        cropBox.width = largestContainedSize.width;
+        cropBox.maxWidth = cropBox.width;
+        cropBox.height = largestContainedSize.height;
+        cropBox.maxHeight = cropBox.height;
+        cropBox.left = (container.width - cropBox.width) / 2;
+        cropBox.maxLeft = cropBox.left;
+        cropBox.minLeft = cropBox.left;
+        cropBox.top = (container.height - cropBox.height) / 2;
+        cropBox.maxTop = cropBox.top;
+        cropBox.minTop = cropBox.top;
+        this.renderCropBox();
       }
     },
 
@@ -1543,7 +1732,9 @@
           return;
         }
 
-        event.preventDefault();
+        if (action !== ACTION_NONE) {
+          event.preventDefault();
+        }
 
         this.action = action;
         this.cropping = false;
@@ -1596,7 +1787,11 @@
           return;
         }
 
-        event.preventDefault();
+        if (action !== ACTION_NONE) {
+          event.preventDefault();
+        } else {
+          return;
+        }
 
         this.endX = e.pageX || originalEvent && originalEvent.pageX;
         this.endY = e.pageY || originalEvent && originalEvent.pageY;
@@ -1636,6 +1831,7 @@
       var action = this.action;
       var container = this.container;
       var canvas = this.canvas;
+      var image = this.image;
       var cropBox = this.cropBox;
       var width = cropBox.width;
       var height = cropBox.height;
@@ -2018,11 +2214,29 @@
         // No default
       }
 
+      var prospective = {
+        top: top,
+        left: left,
+        width: width,
+        height: height
+      };
+
+      if (options.viewMode === 4 && !cropBoxInImage(prospective, canvas, image)) {
+        prospective.top = cropBox.top;
+        // Let’s try just X axis:
+        if (!cropBoxInImage(prospective, canvas, image)) {
+          prospective.top = top;
+          prospective.left = cropBox.left;
+          // Let’s give the Y axis a go:
+          renderable = cropBoxInImage(prospective, canvas, image);
+        }
+      }
+
       if (renderable) {
-        cropBox.width = width;
-        cropBox.height = height;
-        cropBox.left = left;
-        cropBox.top = top;
+        cropBox.width = prospective.width;
+        cropBox.height = prospective.height;
+        cropBox.left = prospective.left;
+        cropBox.top = prospective.top;
         this.action = action;
 
         this.renderCropBox();
@@ -2649,55 +2863,71 @@
      * @return {HTMLCanvasElement} canvas
      */
     getCroppedCanvas: function (options) {
-      var originalWidth;
-      var originalHeight;
       var canvasWidth;
       var canvasHeight;
-      var scaledWidth;
-      var scaledHeight;
-      var scaledRatio;
-      var aspectRatio;
+      var imageWidth;
+      var imageHeight;
+      var outerWidth;
+      var outerHeight;
       var canvas;
+      var image;
       var context;
-      var data;
+      var margin = MARGIN;
+      var border = BORDER;
+      var tiled = false;
+      var data = this.getData();
 
       if (!this.isBuilt || !SUPPORT_CANVAS) {
         return;
       }
 
+      image = getSourceCanvas(this.$clone[0], this.image, data);
+
       if (!this.isCropped) {
-        return getSourceCanvas(this.$clone[0], this.image);
+        return image;
       }
+
+      imageWidth = outerWidth = image.width;
+      imageHeight = outerHeight = image.height;
 
       if (!$.isPlainObject(options)) {
         options = {};
       }
 
-      data = this.getData();
-      originalWidth = data.width;
-      originalHeight = data.height;
-      aspectRatio = originalWidth / originalHeight;
-
       if ($.isPlainObject(options)) {
-        scaledWidth = options.width;
-        scaledHeight = options.height;
-
-        if (scaledWidth) {
-          scaledHeight = scaledWidth / aspectRatio;
-          scaledRatio = scaledWidth / originalWidth;
-        } else if (scaledHeight) {
-          scaledWidth = scaledHeight * aspectRatio;
-          scaledRatio = scaledHeight / originalHeight;
-        }
+        imageWidth = options.imageWidth || imageWidth;
+        imageHeight = options.imageHeight || imageHeight;
+        outerWidth = options.width || outerWidth;
+        outerHeight = options.height || outerHeight;
+        tiled = options.tiled;
+        margin = options.margin || MARGIN * DPI;
+        border = options.border || BORDER * DPI;
       }
 
       // The canvas element will use `Math.floor` on a float number, so floor first
-      canvasWidth = floor(scaledWidth || originalWidth);
-      canvasHeight = floor(scaledHeight || originalHeight);
+      canvasWidth = floor(outerWidth);
+      canvasHeight = floor(outerHeight);
 
       canvas = $('<canvas>')[0];
+      if (tiled === true) {
+        var tiles = calculateMostTiles({
+          width: canvasWidth,
+          height: canvasHeight
+        }, {
+          width: imageWidth,
+          height: imageHeight
+        }, border, margin);
+
+        if (tiles.canvasRotated === true) {
+          var tmp = canvasWidth;
+          canvasWidth = canvasHeight;
+          canvasHeight = tmp;
+        }
+      }
+
       canvas.width = canvasWidth;
       canvas.height = canvasHeight;
+
       context = canvas.getContext('2d');
 
       if (options.fillColor) {
@@ -2706,65 +2936,27 @@
       }
 
       // https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D.drawImage
-      context.drawImage.apply(context, (function () {
-        var source = getSourceCanvas(this.$clone[0], this.image);
-        var sourceWidth = source.width;
-        var sourceHeight = source.height;
-        var canvas = this.canvas;
-        var params = [source];
+      if (tiled === true) {
+        var marginPixels = margin;
+        var horizontalBorderPixels = (canvasWidth - (tiles.horizontal * imageWidth) - ((tiles.horizontal - 1) * marginPixels)) / 2;
+        var verticalBorderPixels = (canvasHeight - (tiles.vertical * imageHeight) - ((tiles.vertical - 1) * marginPixels)) / 2;
 
-        // Source canvas
-        var srcX = data.x + canvas.naturalWidth * (abs(data.scaleX || 1) - 1) / 2;
-        var srcY = data.y + canvas.naturalHeight * (abs(data.scaleY || 1) - 1) / 2;
-        var srcWidth;
-        var srcHeight;
-
-        // Destination canvas
-        var dstX;
-        var dstY;
-        var dstWidth;
-        var dstHeight;
-
-        if (srcX <= -originalWidth || srcX > sourceWidth) {
-          srcX = srcWidth = dstX = dstWidth = 0;
-        } else if (srcX <= 0) {
-          dstX = -srcX;
-          srcX = 0;
-          srcWidth = dstWidth = min(sourceWidth, originalWidth + srcX);
-        } else if (srcX <= sourceWidth) {
-          dstX = 0;
-          srcWidth = dstWidth = min(originalWidth, sourceWidth - srcX);
+        // Then draw on tiled images:
+        for (var x = 0; x < tiles.horizontal; x++) {
+          for (var y = 0; y < tiles.vertical; y++) {
+            var posX = horizontalBorderPixels + (marginPixels * x) + (imageWidth * x);
+            var posY = verticalBorderPixels + (marginPixels * y) + (imageHeight * y);
+            context.drawImage(image, posX, posY, imageWidth, imageHeight);
+          }
         }
+      } else {
+        var dstX = (canvasWidth - imageWidth) / 2;
+        var dstY = (canvasHeight - imageHeight) / 2;
+        var dstWidth = imageWidth;
+        var dstHeight = imageHeight;
 
-        if (srcWidth <= 0 || srcY <= -originalHeight || srcY > sourceHeight) {
-          srcY = srcHeight = dstY = dstHeight = 0;
-        } else if (srcY <= 0) {
-          dstY = -srcY;
-          srcY = 0;
-          srcHeight = dstHeight = min(sourceHeight, originalHeight + srcY);
-        } else if (srcY <= sourceHeight) {
-          dstY = 0;
-          srcHeight = dstHeight = min(originalHeight, sourceHeight - srcY);
-        }
-
-        // All the numerical parameters should be integer for `drawImage` (#476)
-        params.push(floor(srcX), floor(srcY), floor(srcWidth), floor(srcHeight));
-
-        // Scale destination sizes
-        if (scaledRatio) {
-          dstX *= scaledRatio;
-          dstY *= scaledRatio;
-          dstWidth *= scaledRatio;
-          dstHeight *= scaledRatio;
-        }
-
-        // Avoid "IndexSizeError" in IE and Firefox
-        if (dstWidth > 0 && dstHeight > 0) {
-          params.push(floor(dstX), floor(dstY), floor(dstWidth), floor(dstHeight));
-        }
-
-        return params;
-      }).call(this));
+        context.drawImage(image, dstX, dstY, dstWidth, dstHeight);
+      }
 
       return canvas;
     },
@@ -2827,7 +3019,7 @@
   Cropper.DEFAULTS = {
 
     // Define the view mode of the cropper
-    viewMode: 0, // 0, 1, 2, 3
+    viewMode: 0, // 0, 1, 2, 3, 4
 
     // Define the dragging mode of the cropper
     dragMode: 'crop', // 'crop', 'move' or 'none'
