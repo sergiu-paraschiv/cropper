@@ -21,18 +21,18 @@ body {
 
 .navbar-toggle:hover,
 .navbar-toggle:focus {
-  border-color: #0074d9;
+  border-color: #80D5BD;
 }
 
 .navbar-toggle .icon-bar {
-  background-color: #0074d9;
+  background-color: #80D5BD;
 }
 
 
 /* Jumbotron */
 
 .docs-jumbotron {
-  background-color: #0074d9;
+  background-color: #80D5BD;
   color: #fff;
 }
 
@@ -310,4 +310,27 @@ body {
   padding-right: 8px;
   background-color: #fff;
   content: "♥";
+}
+
+a {
+	color: #80D5BD;
+}
+
+a:hover {
+	color: #6DB09D;
+}
+
+.btn-primary {
+	background-color: #6DB09D;
+	border-color: #508576;
+}
+
+.btn-primary.active, .btn-primary:active, .open>.dropdown-toggle.btn-primary, .btn-primary:hover {
+	background-color: #578C7D;
+	border-color: #508576;
+}
+
+.btn-primary.active.focus, .btn-primary.active:focus, .btn-primary.active:hover, .btn-primary:active.focus, .btn-primary:active:focus, .btn-primary:active:hover, .open>.dropdown-toggle.btn-primary.focus, .open>.dropdown-toggle.btn-primary:focus, .open>.dropdown-toggle.btn-primary:hover {
+	background-color: #578C7D;
+	border-color: #508576;
 }
