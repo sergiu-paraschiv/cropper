@@ -15,8 +15,8 @@ of those who contribute to his original repo.
 
 ## Why a Fork?
 
-This project was forked from the original [Cropper](https://fengyuanchen.github.io/cropper) so as to add the new [viewmode](#viewMode)
-functionality, and to enable significant changes to the [getCroppedCanvas](#getCroppedCanvas) method to better handle low
+This project was forked from the original [Cropper](https://fengyuanchen.github.io/cropper) so as to add the new [viewMode](#viewmode)
+functionality, and to enable significant changes to the [getCroppedCanvas](#getcroppedcanvasoptions) method to better handle low
 memory devices and enable tiling of the image on the resulting canvas.
 
 This was work that was deemed to complicate a nicely simple [Cropper](https://fengyuanchen.github.io/cropper), and so could
