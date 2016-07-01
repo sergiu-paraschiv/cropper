@@ -50,56 +50,20 @@ body {
   }
 }
 
-.docs-carbonads-container {
+.logo-container {
   position: relative;
 }
 
-.docs-carbonads {
+.logo {
+  position: absolute;
+  right: 0;
+  bottom: 20px;
   max-width: 350px;
-  padding: 15px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  overflow: hidden;
 }
 
-.carbon-wrap {
-  overflow: hidden;
+.logo img {
+	width: 100%;
 }
-
-.carbon-img {
-  clear: left;
-  float: left;
-  display: block;
-}
-
-.carbon-text,
-.carbon-poweredby {
-  display: block;
-  margin-left: 140px;
-}
-
-.carbon-text,
-.carbon-text:hover,
-.carbon-text:focus {
-  color: #fff;
-  text-decoration: none;
-}
-
-.carbon-poweredby,
-.carbon-poweredby:hover,
-.carbon-poweredby:focus {
-  color: #ddd;
-  text-decoration: none;
-}
-
-@media (min-width: 992px) {
-  .docs-carbonads {
-    position: absolute;
-    right: 0;
-    bottom: 5px;
-  }
-}
-
 
 /* Content */
 
