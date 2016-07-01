@@ -393,8 +393,7 @@
     return pointInRectangle(cropBoxPoints.A, imagePoints) &&
         pointInRectangle(cropBoxPoints.B, imagePoints) &&
         pointInRectangle(cropBoxPoints.C, imagePoints) &&
-        pointInRectangle(cropBoxPoints.D, imagePoints)
-    ;
+        pointInRectangle(cropBoxPoints.D, imagePoints);
   }
 
   function largestContainedCropBox(image, cropBoxAspectRatio) {

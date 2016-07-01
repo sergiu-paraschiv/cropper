@@ -692,7 +692,7 @@
         var horizontalBorderPixels = (canvasWidth - (tiles.horizontal * imageWidth) - ((tiles.horizontal - 1) * marginPixels)) / 2;
         var verticalBorderPixels = (canvasHeight - (tiles.vertical * imageHeight) - ((tiles.vertical - 1) * marginPixels)) / 2;
 
-        //Then draw on tiled images:
+        // Then draw on tiled images:
         for (var x = 0; x < tiles.horizontal; x++) {
           for (var y = 0; y < tiles.vertical; y++) {
             var posX = horizontalBorderPixels + (marginPixels * x) + (imageWidth * x);
@@ -702,7 +702,7 @@
         }
       } else {
         var dstX = (canvasWidth - imageWidth) / 2;
-      	var dstY = (canvasHeight - imageHeight) / 2;
+        var dstY = (canvasHeight - imageHeight) / 2;
         var dstWidth = imageWidth;
         var dstHeight = imageHeight;
 
