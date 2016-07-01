@@ -1,12 +1,26 @@
 # Cropper
 
-> A simple jQuery image cropping plugin.
+> A simple jQuery image cropping plugin originally written by [Fengyuan Chen](http://chenfengyuan.com/).
 
 - [Website](https://oddprints.github.io/cropper)
+- [Fengyuan Chen's Website](https://fengyuanchen.github.io/cropper)
 
 [![Build Status Images](https://travis-ci.org/OddPrints/cropper.svg)](https://travis-ci.org/OddPrints/cropper)
 
+## Credit
 
+Credit is due to the author and contributor of the original [Cropper](https://fengyuanchen.github.io/cropper), which
+was first written by [Fengyuan Chen](http://chenfengyuan.com/). All of this work is built upon his fantastic work, and that
+of those who contribute to his original repo.
+
+## Why a Fork?
+
+This project was forked from the original [Cropper](https://fengyuanchen.github.io/cropper) so as to add the new [viewmode](#viewMode)
+functionality, and to enable significant changes to the [getCroppedCanvas](#getCroppedCanvas) method to better handle low
+memory devices and enable tiling of the image on the resulting canvas.
+
+This was work that was deemed to complicate a nicely simple [Cropper](https://fengyuanchen.github.io/cropper), and so could
+not be merged back in.
 
 ## Table of contents
 
@@ -126,8 +140,6 @@ See the [FAQ](FAQ.md) documentation.
 
 
 #### Known issues
-
-- [Known iOS resource limits](https://developer.apple.com/library/mac/documentation/AppleApplications/Reference/SafariWebContent/CreatingContentforSafarioniPhone/CreatingContentforSafarioniPhone.html): As iOS devices limit memory, the browser may crash when you are cropping a large image (iPhone camera resolution). To avoid this, you may resize the image first (below 1024px) before start a cropper.
 
 - Known image size increase: When export the cropped image on browser-side with the `HTMLCanvasElement.toDataURL` method, the the exported image'size may be greater than the original image's. This is because the exported image'type is not the same as the original image's. So just pass the original image's type as the first parameter to `toDataURL` to fix this. For example, if the original type is JPEG, then use `$().cropper('getCroppedCanvas').toDataURL('image/jpeg')` to export image.
 
