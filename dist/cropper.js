@@ -5,7 +5,7 @@
  * Copyright (c) 2015-2016 OddPrints and contributors originally 2014-2016 Fengyuan Chen and contributors
  * Released under the MIT license
  *
- * Date: 2016-07-01T11:35:42.277Z
+ * Date: 2016-07-11T09:19:32.562Z
  */
 
 (function (factory) {
