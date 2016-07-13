@@ -391,7 +391,9 @@
         top: top,
         left: left,
         width: width,
-        height: height
+        height: height,
+        maxWidth: maxWidth,
+        maxHeight: maxHeight
       };
 
       if (options.viewMode === 4 && !cropBoxInImage(prospective, canvas, image)) {
@@ -410,6 +412,8 @@
         cropBox.height = prospective.height;
         cropBox.left = prospective.left;
         cropBox.top = prospective.top;
+        cropBox.maxWidth = maxWidth;
+        cropBox.maxHeight = maxHeight;
         this.action = action;
 
         this.renderCropBox();

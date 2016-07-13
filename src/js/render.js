@@ -424,7 +424,7 @@
         }
       }
 
-      if (isSizeLimited && isPositionLimited && options.viewMode === 4 && image.left && image.height && !cropBoxInImage(cropBox, canvas, image)) {
+      if (options.viewMode === 4 && isSizeLimited && isPositionLimited && image.left && image.height && cropBox.left !== undefined && cropBox.top !== undefined && !cropBoxInImage(cropBox, canvas, image)) {
         var largestContainedSize = largestContainedCropBox(image, options.aspectRatio || canvas.aspectRatio);
         cropBox.width = largestContainedSize.width;
         cropBox.maxWidth = cropBox.width;

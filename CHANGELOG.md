@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.3.4 (Jul 13, 2016)
+
+- Fixed issue in viewMode 4 whereby cropbox was being minimised incorrectly.
+- Fixed issue in viewMode 4 whereby minimised cropBox couldn’t be expanded.
+
 
 ## 2.3.3 (Jul 1, 2016)
 

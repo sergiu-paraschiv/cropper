@@ -2,6 +2,7 @@
       var restore = this.options.restore;
       var $container = this.$container;
       var container = this.container;
+      var options = this.options;
       var canvasData;
       var cropBoxData;
       var ratio;
@@ -15,14 +16,14 @@
 
       // Resize when width changed or height changed
       if (ratio !== 1 || $container.height() !== container.height) {
-        if (restore) {
+        if (restore && options.viewMode !== 4) {
           canvasData = this.getCanvasData();
           cropBoxData = this.getCropBoxData();
         }
 
         this.render();
 
-        if (restore) {
+        if (restore && options.viewMode !== 4) {
           this.setCanvasData($.each(canvasData, function (i, n) {
             canvasData[i] = n * ratio;
           }));

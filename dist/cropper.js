@@ -1,11 +1,11 @@
 /*!
- * Cropper v2.3.3
+ * Cropper v2.3.4
  * https://github.com/OddPrints/cropper forked from https://github.com/fengyuanchen/cropper
  *
  * Copyright (c) 2015-2016 OddPrints and contributors originally 2014-2016 Fengyuan Chen and contributors
  * Released under the MIT license
  *
- * Date: 2016-07-11T09:19:32.562Z
+ * Date: 2016-07-13T10:25:56.300Z
  */
 
 (function (factory) {
@@ -1355,7 +1355,7 @@
         }
       }
 
-      if (isSizeLimited && isPositionLimited && options.viewMode === 4 && image.left && image.height && !cropBoxInImage(cropBox, canvas, image)) {
+      if (options.viewMode === 4 && isSizeLimited && isPositionLimited && image.left && image.height && cropBox.left !== undefined && cropBox.top !== undefined && !cropBoxInImage(cropBox, canvas, image)) {
         var largestContainedSize = largestContainedCropBox(image, options.aspectRatio || canvas.aspectRatio);
         cropBox.width = largestContainedSize.width;
         cropBox.maxWidth = cropBox.width;
@@ -1617,6 +1617,7 @@
       var restore = this.options.restore;
       var $container = this.$container;
       var container = this.container;
+      var options = this.options;
       var canvasData;
       var cropBoxData;
       var ratio;
@@ -1630,14 +1631,14 @@
 
       // Resize when width changed or height changed
       if (ratio !== 1 || $container.height() !== container.height) {
-        if (restore) {
+        if (restore && options.viewMode !== 4) {
           canvasData = this.getCanvasData();
           cropBoxData = this.getCropBoxData();
         }
 
         this.render();
 
-        if (restore) {
+        if (restore && options.viewMode !== 4) {
           this.setCanvasData($.each(canvasData, function (i, n) {
             canvasData[i] = n * ratio;
           }));
@@ -2218,7 +2219,9 @@
         top: top,
         left: left,
         width: width,
-        height: height
+        height: height,
+        maxWidth: maxWidth,
+        maxHeight: maxHeight
       };
 
       if (options.viewMode === 4 && !cropBoxInImage(prospective, canvas, image)) {
@@ -2237,6 +2240,8 @@
         cropBox.height = prospective.height;
         cropBox.left = prospective.left;
         cropBox.top = prospective.top;
+        cropBox.maxWidth = maxWidth;
+        cropBox.maxHeight = maxHeight;
         this.action = action;
 
         this.renderCropBox();
