@@ -5,7 +5,7 @@
  * Copyright (c) 2015-2016 OddPrints and contributors originally 2014-2016 Fengyuan Chen and contributors
  * Released under the MIT license
  *
- * Date: 2016-07-13T10:25:56.300Z
+ * Date: 2016-07-14T09:49:51.008Z
  */
 
 (function (factory) {
@@ -483,23 +483,25 @@
   }
 
   function cropBoxInImage(cropBox, canvas, image) {
-    var cropBoxPoints = {
-      A: { x: round(cropBox.left), y: round(cropBox.top) },
-      B: { x: round(cropBox.left + cropBox.width), y: round(cropBox.top) },
-      C: { x: round(cropBox.left + cropBox.width), y: round(cropBox.top + cropBox.height) },
-      D: { x: round(cropBox.left), y: round(cropBox.top + cropBox.height) }
-    };
-
     var centers = {
       x: canvas.left + image.left + (image.width / 2),
       y: canvas.top + image.top + (image.height / 2)
     };
+
     var angle = (image.rotate ? image.rotate : 0) * Math.PI / 180;
+
     var imagePoints = {
       A: rotatePoint(centers, { x: canvas.left + image.left, y: canvas.top + image.top }, angle),
       B: rotatePoint(centers, { x: canvas.left + image.left + image.width, y: canvas.top + image.top }, angle),
       C: rotatePoint(centers, { x: canvas.left + image.left + image.width, y: canvas.top + image.top + image.height }, angle),
       D: rotatePoint(centers, { x: canvas.left + image.left, y: canvas.top + image.top + image.height }, angle)
+    };
+
+    var cropBoxPoints = {
+      A: { x: round(cropBox.left), y: round(cropBox.top) },
+      B: { x: round(cropBox.left + cropBox.width), y: round(cropBox.top) },
+      C: { x: round(cropBox.left + cropBox.width), y: round(cropBox.top + cropBox.height) },
+      D: { x: round(cropBox.left), y: round(cropBox.top + cropBox.height) }
     };
 
     return pointInRectangle(cropBoxPoints.A, imagePoints) &&
@@ -1123,6 +1125,7 @@
       var canvas = this.canvas;
       var image = this.image;
       var container = this.container;
+      var cropBox = this.cropBox;
       var rotate = image.rotate;
       var naturalWidth = image.naturalWidth;
       var naturalHeight = image.naturalHeight;
@@ -1168,13 +1171,13 @@
 
       if (options.viewMode === 4) {
         if (canvas.aspectRatio > (container.width / container.height)) {
-          if (parseInt(canvas.width) != parseInt(container.width)) {
+          if (parseInt(canvas.width) !== parseInt(container.width)) {
             canvas.width = container.width;
             canvas.height = canvas.width / canvas.aspectRatio;
             canvas.left = 0;
             canvas.top = (container.height - canvas.height) / 2;
           }
-        } else if (parseInt(canvas.height) != parseInt(container.height)) {
+        } else if (parseInt(canvas.height) !== parseInt(container.height)) {
           canvas.height = container.height;
           canvas.width = canvas.height * canvas.aspectRatio;
           canvas.top = 0;
@@ -1209,6 +1212,7 @@
 
       if (this.isCropped && this.isLimited) {
         this.limitCropBox(true, true);
+        this.constrainCropBox(cropBox, canvas, image);
       }
 
       if (isChanged) {
@@ -1289,6 +1293,31 @@
       this.initialCropBox = $.extend({}, cropBox);
     },
 
+    constrainCropBox: function (cropBox, canvas, image) {
+      var options = this.options;
+      var container = this.container;
+      if (options.viewMode === 4 && !cropBoxInImage(cropBox, canvas, image)) {
+        var largestContainedSize = largestContainedCropBox(image, options.aspectRatio || canvas.aspectRatio);
+        cropBox.width = largestContainedSize.width;
+        cropBox.maxWidth = cropBox.width;
+        cropBox.height = largestContainedSize.height;
+        cropBox.maxHeight = cropBox.height;
+        cropBox.left = (container.width - cropBox.width) / 2;
+        cropBox.maxLeft = cropBox.left;
+        cropBox.minLeft = cropBox.left;
+        cropBox.top = (container.height - cropBox.height) / 2;
+        cropBox.maxTop = cropBox.top;
+        cropBox.minTop = cropBox.top;
+      }
+
+      this.$cropBox.css({
+        width: cropBox.width,
+        height: cropBox.height,
+        left: cropBox.left,
+        top: cropBox.top
+      });
+    },
+
     limitCropBox: function (isSizeLimited, isPositionLimited) {
       var options = this.options;
       var aspectRatio = options.aspectRatio;
@@ -1296,7 +1325,6 @@
       var containerWidth = container.width;
       var containerHeight = container.height;
       var canvas = this.canvas;
-      var image = this.image;
       var cropBox = this.cropBox;
       var isLimited = this.isLimited;
       var minCropBoxWidth;
@@ -1354,21 +1382,6 @@
           cropBox.maxTop = containerHeight - cropBox.height;
         }
       }
-
-      if (options.viewMode === 4 && isSizeLimited && isPositionLimited && image.left && image.height && cropBox.left !== undefined && cropBox.top !== undefined && !cropBoxInImage(cropBox, canvas, image)) {
-        var largestContainedSize = largestContainedCropBox(image, options.aspectRatio || canvas.aspectRatio);
-        cropBox.width = largestContainedSize.width;
-        cropBox.maxWidth = cropBox.width;
-        cropBox.height = largestContainedSize.height;
-        cropBox.maxHeight = cropBox.height;
-        cropBox.left = (container.width - cropBox.width) / 2;
-        cropBox.maxLeft = cropBox.left;
-        cropBox.minLeft = cropBox.left;
-        cropBox.top = (container.height - cropBox.height) / 2;
-        cropBox.maxTop = cropBox.top;
-        cropBox.minTop = cropBox.top;
-        this.renderCropBox();
-      }
     },
 
     renderCropBox: function () {
@@ -1377,6 +1390,8 @@
       var containerWidth = container.width;
       var containerHeight = container.height;
       var cropBox = this.cropBox;
+      var canvas = this.canvas;
+      var image = this.image;
 
       if (cropBox.width > cropBox.maxWidth || cropBox.width < cropBox.minWidth) {
         cropBox.left = cropBox.oldLeft;
@@ -1400,12 +1415,7 @@
         this.$face.data(DATA_ACTION, (cropBox.width === containerWidth && cropBox.height === containerHeight) ? ACTION_MOVE : ACTION_ALL);
       }
 
-      this.$cropBox.css({
-        width: cropBox.width,
-        height: cropBox.height,
-        left: cropBox.left,
-        top: cropBox.top
-      });
+      this.constrainCropBox(cropBox, canvas, image);
 
       if (this.isCropped && this.isLimited) {
         this.limitCanvas(true, true);

@@ -371,23 +371,25 @@
   }
 
   function cropBoxInImage(cropBox, canvas, image) {
-    var cropBoxPoints = {
-      A: { x: round(cropBox.left), y: round(cropBox.top) },
-      B: { x: round(cropBox.left + cropBox.width), y: round(cropBox.top) },
-      C: { x: round(cropBox.left + cropBox.width), y: round(cropBox.top + cropBox.height) },
-      D: { x: round(cropBox.left), y: round(cropBox.top + cropBox.height) }
-    };
-
     var centers = {
       x: canvas.left + image.left + (image.width / 2),
       y: canvas.top + image.top + (image.height / 2)
     };
+
     var angle = (image.rotate ? image.rotate : 0) * Math.PI / 180;
+
     var imagePoints = {
       A: rotatePoint(centers, { x: canvas.left + image.left, y: canvas.top + image.top }, angle),
       B: rotatePoint(centers, { x: canvas.left + image.left + image.width, y: canvas.top + image.top }, angle),
       C: rotatePoint(centers, { x: canvas.left + image.left + image.width, y: canvas.top + image.top + image.height }, angle),
       D: rotatePoint(centers, { x: canvas.left + image.left, y: canvas.top + image.top + image.height }, angle)
+    };
+
+    var cropBoxPoints = {
+      A: { x: round(cropBox.left), y: round(cropBox.top) },
+      B: { x: round(cropBox.left + cropBox.width), y: round(cropBox.top) },
+      C: { x: round(cropBox.left + cropBox.width), y: round(cropBox.top + cropBox.height) },
+      D: { x: round(cropBox.left), y: round(cropBox.top + cropBox.height) }
     };
 
     return pointInRectangle(cropBoxPoints.A, imagePoints) &&
