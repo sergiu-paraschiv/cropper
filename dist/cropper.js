@@ -1393,16 +1393,16 @@
       var canvas = this.canvas;
       var image = this.image;
 
-      if (cropBox.width > cropBox.maxWidth || cropBox.width < cropBox.minWidth) {
-        cropBox.left = cropBox.oldLeft;
-      }
+    //   if (cropBox.width > cropBox.maxWidth || cropBox.width < cropBox.minWidth) {
+    //     cropBox.left = cropBox.oldLeft;
+    //   }
+      //
+    //   if (cropBox.height > cropBox.maxHeight || cropBox.height < cropBox.minHeight) {
+    //     cropBox.top = cropBox.oldTop;
+    //   }
 
-      if (cropBox.height > cropBox.maxHeight || cropBox.height < cropBox.minHeight) {
-        cropBox.top = cropBox.oldTop;
-      }
-
-      cropBox.width = min(max(cropBox.width, cropBox.minWidth), cropBox.maxWidth);
-      cropBox.height = min(max(cropBox.height, cropBox.minHeight), cropBox.maxHeight);
+    //   cropBox.width = min(max(cropBox.width, cropBox.minWidth), cropBox.maxWidth);
+    //   cropBox.height = min(max(cropBox.height, cropBox.minHeight), cropBox.maxHeight);
 
       this.limitCropBox(false, true);
 
@@ -2859,6 +2859,8 @@
           cropBox.height = data.height;
         }
 
+        console.log('x1', cropBox.height);
+
         if (aspectRatio) {
           if (isWidthChanged) {
             cropBox.height = cropBox.width / aspectRatio;
@@ -2866,6 +2868,8 @@
             cropBox.width = cropBox.height * aspectRatio;
           }
         }
+
+        console.log('x2', cropBox.height);
 
         this.renderCropBox();
       }
