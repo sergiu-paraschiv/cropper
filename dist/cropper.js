@@ -2859,8 +2859,6 @@
           cropBox.height = data.height;
         }
 
-        console.log('x1', cropBox.height);
-
         if (aspectRatio) {
           if (isWidthChanged) {
             cropBox.height = cropBox.width / aspectRatio;
@@ -2868,8 +2866,6 @@
             cropBox.width = cropBox.height * aspectRatio;
           }
         }
-
-        console.log('x2', cropBox.height);
 
         this.renderCropBox();
       }
