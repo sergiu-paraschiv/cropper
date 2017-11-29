@@ -22,6 +22,10 @@
 })(function ($) {
 
   'use strict';
+  
+  if (typeof window === 'undefined') {
+    return;
+  }
 
   // Globals
   var $window = $(window);
